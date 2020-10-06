@@ -2,6 +2,42 @@
 
 Leaf 是一个轻量且快速的代理工具。
 
+## 内容
+
+- [下载](#--)
+- [iOS TF 测试](#ios-tf---)
+- [conf 配置文件](#conf-----)
+- [json 配置文件](#json-----)
+- [Log](#log)
+- [DNS](#dns)
+- [Inbounds](#inbounds)
+  * [http](#http)
+  * [socks](#socks)
+- [Outbounds](#outbounds)
+  * [direct](#direct)
+  * [drop](#drop)
+  * [tls](#tls)
+  * [ws](#ws)
+  * [shadowsocks](#shadowsocks)
+  * [vmess](#vmess)
+  * [trojan](#trojan)
+  * [socks](#socks-1)
+  * [chain](#chain)
+  * [failover](#failover)
+  * [tryall](#tryall)
+  * [random](#random)
+- [规则](#--)
+  * [domain](#domain)
+  * [domainSuffix](#domainsuffix)
+  * [domainKeyword](#domainkeyword)
+  * [ip](#ip)
+  * [geoip](#geoip)
+  * [external](#external)
+    + [mmdb](#mmdb)
+    + [site](#site)
+- [进阶功能](#----)
+  * [TUN Inbound](#tun-inbound)
+
 ## 下载
 
 https://github.com/eycorsican/leaf/releases
@@ -255,6 +291,7 @@ DNS 用于 `direct` Outbound 请求的域名解析，以及其它 Outbound 中�
 
 ## Inbounds
 
+```json
 "inbounds": [
     {
         ...
@@ -263,6 +300,7 @@ DNS 用于 `direct` Outbound 请求的域名解析，以及其它 Outbound 中�
         ...
     }
 ]
+```
 
 inbounds 是一个数组，每一项可以是以下：
 
@@ -583,9 +621,109 @@ WebSocket 传输，一般用来叠加到其它代理或传输协议上。
 
 规则方面跟 V2Ray 差不多，只是把域名规则展开成 `domain`, `domainSuffix`, `domainKeyword`。
 
+```json
+"rules": [
+    {
+        ...
+    },
+    {
+        ...
+    }
+]
+```
+
+`rules` 是一个数组，每一项可以是以下：
+
+### domain
+
+匹配整个域名。
+
+```json
+{
+    "domain": [
+        "www.google.com"
+    ],
+    "target": "failover_out"
+}
+```
+
+### domainSuffix
+
+匹配子域名，虽然名字是 `Suffix`，但只匹配子域名，即 `google.com` 匹配 `www.google.com`，但不匹配 `wwwgoogle.com`。
+
+```json
+{
+    "domainSuffix": [
+        "google.com"
+    ],
+    "target": "failover_out"
+}
+```
+
+### domainKeyword
+
+匹配域名关键字。
+
+```json
+{
+    "domainKeyword": [
+        "google"
+    ],
+    "target": "failover_out"
+}
+```
+
+### ip
+
+匹配 IP 或 IP-CIDR。
+
+```json
+{
+    "ip": [
+        "8.8.8.8/32",
+        "8.8.4.4"
+    ],
+    "target": "failover_out"
+}
+```
+
+### geoip
+
+可执行文件目录中必需有 `geo.mmdb` 文件存在。
+
+```json
+{
+    "geoip": [
+        "us",
+        "jp"
+    ],
+    "target": "failover_out"
+}
+```
+
+### external
+
 `external` 规则可以从外部文件加载规则，支持两种格式
 
-### mmdb
+```json
+{
+    "external": [
+        "mmdb:us",
+    ],
+    "target": "failover_out"
+}
+```
+
+```json
+{
+    "external": [
+        "site:cn",
+    ],
+    "target": "direct_out"
+}
+```
+
+#### mmdb
 
 MaxMind 的 mmdb 格式，可以有如下形式：
 
@@ -593,7 +731,7 @@ MaxMind 的 mmdb 格式，可以有如下形式：
 - `mmdb:FILENAME:TAG` 假设 mmdb 文件存在于可执行文件目录，文件名为 `FILENAME`
 - `mmdb:PATH:TAG` 指写 mmdb 文件的绝对路径为 `PATH`
 
-### site
+#### site
 
 V2Ray 的 `dat` 文件格式，可以有如下形式：
 
@@ -661,8 +799,8 @@ V2Ray 的 `dat` 文件格式，可以有如下形式：
 ```
 
 ```json
-"dns" {
-	"bind": "192.168.0.99",
-	"servers": ["1.1.1.1"]
+"dns": {
+    "bind": "192.168.0.99",
+    "servers": ["1.1.1.1"]
 }
 ```
